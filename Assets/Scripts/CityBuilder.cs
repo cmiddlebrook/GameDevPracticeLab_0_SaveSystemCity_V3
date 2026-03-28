@@ -28,6 +28,14 @@ public class CityBuilder : MonoBehaviour
         activeBuildingPrefab = housePrefab;
     }
 
+    private void Start()
+    {
+        if (SaveSystem.Instance.LoadSavedGame())
+        {
+            SaveSystem.Instance.EnableAutoSave(5);
+        }
+    }
+
 
     private void Update()
     {

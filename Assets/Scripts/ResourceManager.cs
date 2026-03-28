@@ -7,7 +7,7 @@ public class ResourceManager : MonoBehaviour
     public static ResourceManager Instance { get; private set; }
 
 
-    private int _powerAmount;
+    private int _power;
     private int _money;
     private int _population;
 
@@ -17,9 +17,41 @@ public class ResourceManager : MonoBehaviour
         Instance = this;
     }
 
-    public int GetPowerAmount()
+    private void Start()
     {
-        return _powerAmount;
+        if (!SaveSystem.Instance.SavedGameFound)
+        {
+            Debug.Log("Starting new game");
+            return;
+        }
+
+        SaveFileData data = SaveSystem.Instance.SaveFileData;
+
+        _money = data.Money;
+        _power = data.Power;
+        _population = data.Population;
+
+        Debug.Log("Resources loaded from save file");
+    }
+
+    public void AddMoney()
+    {
+        _money++;
+    }
+
+    public void AddPower()
+    {
+        _power++;
+    }
+
+    public void AddPopulation()
+    {
+        _population++;
+    }
+
+    public int GetPower()
+    {
+        return _power;
     }
 
     public int GetMoney()
@@ -32,19 +64,11 @@ public class ResourceManager : MonoBehaviour
         return _population;
     }
 
-    public void AddMoney()
+    public void SetResources(int money, int power, int population)
     {
-        _money++;
-    }
-
-    public void AddPower()
-    {
-        _powerAmount++;
-    }
-
-    public void AddPopulation()
-    {
-        _population++;
+        _money = money;
+        _power = power;
+        _population = population;
     }
 
 }

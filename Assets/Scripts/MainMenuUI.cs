@@ -1,22 +1,29 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using TMPro;
 
-public class MainMenuUI : MonoBehaviour {
+public class MainMenuUI : MonoBehaviour
+{
+
+    [SerializeField] private Button _startButton;
+    [SerializeField] private TextMeshProUGUI _startButtonText;
 
 
-
-    [SerializeField] private Button continueButton;
-
-
-
-    private void Start() {
-        continueButton.onClick.AddListener(() => {
-            Continue();
+    private void Start()
+    {
+        
+        _startButtonText.text = SaveSystem.Instance.SavedGameFound ? "CONTINUE SAVED GAME" : "START NEW GAME";
+        _startButton.onClick.AddListener(() =>
+        {
+            StartGame();
         });
     }
 
-    private void Continue() {
-        // Load latest save
+
+    private void StartGame()
+    {
+        SceneManager.LoadScene("GameScene");
     }
 
 }
