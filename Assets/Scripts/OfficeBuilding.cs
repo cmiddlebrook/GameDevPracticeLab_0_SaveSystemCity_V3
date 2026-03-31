@@ -3,6 +3,7 @@ using UnityEngine;
 public class OfficeBuilding : MonoBehaviour
 {
 
+    public BuildingType BuildingType => BuildingType.OfficeBuilding;
 
     private float _timer;
 

@@ -3,6 +3,7 @@ using UnityEngine;
 public class PowerPlant : MonoBehaviour
 {
 
+    public BuildingType BuildingType => BuildingType.PowerPlant;
 
     private float _timer;
 

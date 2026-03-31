@@ -4,32 +4,41 @@ public class PlaceBuildingArea : MonoBehaviour
 {
 
 
-    [SerializeField] private GameObject baseVisualGameObject;
-    [SerializeField] private GameObject baseSelectedGameObject;
+    [SerializeField] private GameObject _baseVisualGameObject;
+    [SerializeField] private GameObject _baseSelectedGameObject;
 
 
-    private Transform buildingTransform;
+    //private Transform _buildingTransform;
+    private BuildingData _buildingData;
 
 
     public bool IsEmpty()
     {
-        return buildingTransform == null;
+        return _buildingData == null;
     }
 
-    public void AddBuilding(Transform buildingTransform)
+    public BuildingData AddBuilding(Transform buildingTransform, BuildingType type)
     {
-        this.buildingTransform = buildingTransform;
-        baseVisualGameObject.SetActive(false);
+        _baseVisualGameObject.SetActive(false);
+
+        _buildingData = new BuildingData
+        {
+            BuildingType = type,
+            Position = buildingTransform.position,
+            Rotation = buildingTransform.localEulerAngles,
+        };
+
+        return _buildingData;
     }
 
     public void ShowSelected()
     {
-        baseSelectedGameObject.SetActive(true);
+        _baseSelectedGameObject.SetActive(true);
     }
 
     public void HideSelected()
     {
-        baseSelectedGameObject.SetActive(false);
+        _baseSelectedGameObject.SetActive(false);
     }
 
 }
