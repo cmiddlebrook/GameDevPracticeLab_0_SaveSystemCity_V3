@@ -100,8 +100,13 @@ public class SaveSystem : MonoBehaviour
         _saveFileData.PlacedBuildings = CityBuilder.Instance.GetPlacedBuildings();
 
         string fileText = JsonUtility.ToJson(_saveFileData, true);
-        File.WriteAllText(Path.Combine(Application.persistentDataPath, _saveFileName), fileText);
-        Debug.Log("Game saved to file");
+        string filePath = Path.Combine(Application.persistentDataPath, _saveFileName);
+        File.WriteAllText(filePath, fileText);
+        Debug.Log($"Game data saved to {filePath}");
+
+        string screenshotPath = filePath.Replace(".json", ".png");
+        ScreenCapture.CaptureScreenshot(screenshotPath);
+        Debug.Log($"Screenshot saved to: {screenshotPath}");
 
         return true;
     }
