@@ -9,6 +9,7 @@ public class SaveSystem : MonoBehaviour
     private SaveFileData _saveFileData = new();
     private float _saveTimer = 0f;
     private int _manualSaveSlots = 3;
+    private int _currentSaveSlotIndex = 0;
 
 
     public static SaveSystem Instance;
@@ -36,23 +37,24 @@ public class SaveSystem : MonoBehaviour
             if (_saveTimer <= 0f)
             {
                 _saveTimer = _autosaveInterval;
-                SaveGame(0);
+                SaveGame(_currentSaveSlotIndex);
             }
         }
 
     }
 
 
-
     public bool LoadSavedGame(int slotIndex)
     {
-        if (!HasSaveFile(slotIndex))
+        _currentSaveSlotIndex = GetSafeSlotIndex(slotIndex);
+        if (!HasSaveFile(_currentSaveSlotIndex))
         {
             Debug.Log($"No save file found in slot {slotIndex}");
             return true; // No save file found, but not an error, so the return value is still true 
         }
 
-        return ParseSaveFile(slotIndex);
+
+        return ParseSaveFile(_currentSaveSlotIndex);
     }
 
 
@@ -94,7 +96,7 @@ public class SaveSystem : MonoBehaviour
         Debug.Log($"Starting autosaves with an interval of {interval} seconds");
         _autosaveInterval = interval;
         _saveTimer = interval;
-        SaveGame(0);
+        SaveGame(_currentSaveSlotIndex);
     }
 
     public void StopAutosaves()
