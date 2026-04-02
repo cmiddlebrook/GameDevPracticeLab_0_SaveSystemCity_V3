@@ -18,6 +18,7 @@ public class SaveSelectorUI : MonoBehaviour
             Debug.Log($"Added listener to button {i}");
         }
 
+        SetSlotOutlineColours();
     }
 
     private void OnClick_SaveSlot(SaveSlotUI saveSlot, int slotIndex)
@@ -26,6 +27,7 @@ public class SaveSelectorUI : MonoBehaviour
         _selectedSlotIndex = slotIndex;
         SetSlotOutlineColours();
     }
+
 
     private void SetSlotOutlineColours()
     {

@@ -11,4 +11,11 @@ public class SaveSlotUI : MonoBehaviour
     public Image Outline => _outline;
     public Image Screenshot => _screenshot;
 
+    private void Start()
+    {
+        _screenshot.sprite = SaveSystem.Instance.LoadScreenshot();
+    }
+
+
+
 }

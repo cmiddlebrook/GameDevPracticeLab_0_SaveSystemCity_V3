@@ -62,6 +62,7 @@ public class SaveSystem : MonoBehaviour
         Debug.Log($"Auto save enabled, every {saveInterval} seconds");
     }
 
+
     public bool LoadSavedGame()
     {
         if (!SavedGameFound) 
@@ -71,6 +72,23 @@ public class SaveSystem : MonoBehaviour
         }
 
         return ParseSaveFile();
+    }
+
+    public Sprite LoadScreenshot()
+    {
+        string screenshotPath = _filePath.Replace(".json", ".png");
+        Texture2D texture = new Texture2D(1, 1);
+        Sprite sprite = null;
+
+        if (File.Exists(screenshotPath))
+        {
+            byte[] fileData = File.ReadAllBytes(screenshotPath);
+            texture.LoadImage(fileData);
+            sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+            Debug.Log($"Loaded screenshot from: {screenshotPath}");
+        }
+
+        return sprite;
     }
 
     private bool ParseSaveFile()
