@@ -36,12 +36,8 @@ public class CityBuilder : MonoBehaviour
             _buildingAreas[buildingArea.transform.position] = buildingArea;
         }
 
-        if (SaveSystem.Instance.LoadSavedGame())
-        {
-            SaveSystem.Instance.EnableAutoSave(5);
-            SaveFileData data = SaveSystem.Instance.SaveFileData;
-            LoadBuildingsFromSave(data.PlacedBuildings);
-        }
+        LoadBuildingsFromSave(SaveSystem.Instance.SaveFileData.PlacedBuildings);
+        SaveSystem.Instance.StartAutosaves(5);
     }
 
 
@@ -102,6 +98,7 @@ public class CityBuilder : MonoBehaviour
 
     private void LoadBuildingsFromSave(List<BuildingData> buildings)
     {
+        Debug.Log("Loading buildings from save: " + buildings.Count);
         foreach (BuildingData building in buildings)
         {
             Vector3 position = building.Position;

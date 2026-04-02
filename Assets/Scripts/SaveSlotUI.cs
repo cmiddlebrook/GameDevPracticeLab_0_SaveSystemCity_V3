@@ -4,13 +4,13 @@ using TMPro;
 
 public class SaveSlotUI : MonoBehaviour
 {
+    [SerializeField] private int _slotIndex;
     [SerializeField] private Button _button;
     [SerializeField] private Image _outline;
     [SerializeField] private Image _screenshot;
     [SerializeField] private TextMeshProUGUI _slotText;
     [SerializeField] private TextMeshProUGUI _dateText;
 
-    private int _slotIndex;
     private Image _noSaveImage;
 
     public Button Button => _button;
@@ -26,10 +26,6 @@ public class SaveSlotUI : MonoBehaviour
         _dateText.text = SaveSystem.Instance.GetDateSaved(_slotIndex);
     }
 
-    public void SetSlotIndex(int slotIndex)
-    {
-        _slotIndex = slotIndex;
-    }
 
 
 

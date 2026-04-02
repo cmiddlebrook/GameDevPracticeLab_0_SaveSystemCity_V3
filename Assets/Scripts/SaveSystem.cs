@@ -4,19 +4,15 @@ using UnityEngine;
 
 public class SaveSystem : MonoBehaviour
 {
-    [SerializeField] private int _saveInterval;
-
+    private int _autosaveInterval;
     private string _saveFileName = "citybuildersave";
     private SaveFileData _saveFileData = new();
     private float _saveTimer = 0f;
     private int _manualSaveSlots = 3;
-    private int _currentSlotIndex = 0;
 
 
     public static SaveSystem Instance;
     public SaveFileData SaveFileData => _saveFileData;
-    public int NumSavesFound => 0;
-    public bool AutoSaveEnabled;
 
 
     private void Awake()
@@ -29,55 +25,45 @@ public class SaveSystem : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        DisableAutoSave();
-        SetSaveSlot(0);
     }
 
 
     private void Update()
     {
-        if (AutoSaveEnabled)
+        if (_autosaveInterval > 0)
         {
             _saveTimer -= Time.deltaTime;
             if (_saveTimer <= 0f)
             {
-                _saveTimer = _saveInterval;
-                SaveGame();
+                _saveTimer = _autosaveInterval;
+                SaveGame(0);
             }
         }
+
     }
 
 
-    public void DisableAutoSave()
-    {
-        AutoSaveEnabled = false;
-        Debug.Log("Auto save disabled");
-    }
 
-    public void EnableAutoSave(int saveInterval)
+    public bool LoadSavedGame(int slotIndex)
     {
-        _saveInterval = saveInterval;
-        AutoSaveEnabled = true;
-        Debug.Log($"Auto save enabled, every {saveInterval} seconds");
-    }
-
-
-    public bool LoadSavedGame()
-    {
-        if (!HasSaveFile())
+        if (!HasSaveFile(slotIndex))
         {
-            Debug.Log("No save file found");
+            Debug.Log($"No save file found in slot {slotIndex}");
             return true; // No save file found, but not an error, so the return value is still true 
         }
 
-        return ParseSaveFile();
+        return ParseSaveFile(slotIndex);
     }
 
 
     public string GetDateSaved(int slotIndex)
     {
-        return HasSaveFile() ? File.GetLastWriteTime(GetSaveFilePath(slotIndex)).ToString("g") : "---";
+        return HasSaveFile(slotIndex) ? File.GetLastWriteTime(GetSaveFilePath(slotIndex)).ToString("g") : "---";
+    }
+
+    public bool HasSaveFile(int slotIndex)
+    {
+        return File.Exists(GetSaveFilePath(slotIndex));
     }
 
 
@@ -97,28 +83,44 @@ public class SaveSystem : MonoBehaviour
         return sprite;
     }
 
-    private string GetSaveFilePath(int slotIndex = -1)
+    public void StartAutosaves(int interval)
     {
-        int i = (slotIndex == -1) ? _currentSlotIndex : slotIndex;
-        return Path.Combine(Application.persistentDataPath, $"{_saveFileName}{_currentSlotIndex}.json");
+        if (interval <= 0)
+        {
+            Debug.LogWarning($"Invalid autosave interval: {interval}. Must be greater than 0");
+            return;
+        }
+
+        Debug.Log($"Starting autosaves with an interval of {interval} seconds");
+        _autosaveInterval = interval;
+        _saveTimer = interval;
+        SaveGame(0);
     }
 
-    private string GetScreenshotPath(int slotIndex = -1)
+    public void StopAutosaves()
     {
-        int i = (slotIndex == -1) ? _currentSlotIndex : slotIndex;
+        _autosaveInterval = 0;
+    }
+
+
+    private string GetSaveFilePath(int slotIndex)
+    {
+        int i = GetSafeSlotIndex(slotIndex);
+        return Path.Combine(Application.persistentDataPath, $"{_saveFileName}{i}.json");
+    }
+
+    private string GetScreenshotPath(int slotIndex)
+    {
+        int i = GetSafeSlotIndex(slotIndex);
         return Path.Combine(Application.persistentDataPath, $"{_saveFileName}{i}.png");
     }
 
-    private bool HasSaveFile()
-    {
-        return File.Exists(GetSaveFilePath());
-    }
 
-    private bool ParseSaveFile()
+    private bool ParseSaveFile(int slotIndex)
     {
         try
         {
-            string fileText = File.ReadAllText(GetSaveFilePath());
+            string fileText = File.ReadAllText(GetSaveFilePath(slotIndex));
             _saveFileData = JsonUtility.FromJson<SaveFileData>(fileText);
         }
         catch (System.Exception e)
@@ -133,7 +135,7 @@ public class SaveSystem : MonoBehaviour
     }
 
 
-    private bool SaveGame()
+    private bool SaveGame(int slotIndex)
     {
         _saveFileData.Money = ResourceManager.Instance.GetMoney();
         _saveFileData.Power = ResourceManager.Instance.GetPower();
@@ -141,19 +143,24 @@ public class SaveSystem : MonoBehaviour
         _saveFileData.PlacedBuildings = CityBuilder.Instance.GetPlacedBuildings();
 
         string fileText = JsonUtility.ToJson(_saveFileData, true);
-        File.WriteAllText(GetSaveFilePath(), fileText);
-        ScreenCapture.CaptureScreenshot(GetScreenshotPath());
+        File.WriteAllText(GetSaveFilePath(slotIndex), fileText);
+        ScreenCapture.CaptureScreenshot(GetScreenshotPath(slotIndex));
 
-        Debug.Log($"Game saved in slot {_currentSlotIndex}");
+        Debug.Log($"Game saved in slot {slotIndex}");
         return true;
     }
 
-    public int SetSaveSlot(int slotIndex)
+    private int GetSafeSlotIndex(int slotIndex)
     {
-        _currentSlotIndex = math.clamp(slotIndex, 0, _manualSaveSlots); ;
-        Debug.Log($"Save slot set to: {_currentSlotIndex}");
-        return _currentSlotIndex;
+        if (slotIndex < 0 || slotIndex > _manualSaveSlots)
+        {
+            Debug.LogWarning($"Invalid save slot index: {slotIndex}. Valid range is 0 to {_manualSaveSlots}.");
+            Debug.LogWarning($"Defaulting to slot index 0 - AutoSave slot");
+        }
+        
+        return Mathf.Clamp(slotIndex, 0, _manualSaveSlots);
     }
+
 
 
 
