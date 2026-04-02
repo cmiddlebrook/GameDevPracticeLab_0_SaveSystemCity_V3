@@ -19,12 +19,6 @@ public class ResourceManager : MonoBehaviour
 
     private void Start()
     {
-        if (!SaveSystem.Instance.SavedGameFound)
-        {
-            Debug.Log("Starting new game");
-            return;
-        }
-
         SaveFileData data = SaveSystem.Instance.SaveFileData;
 
         _money = data.Money;

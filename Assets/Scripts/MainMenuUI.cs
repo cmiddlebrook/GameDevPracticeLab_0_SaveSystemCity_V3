@@ -13,7 +13,7 @@ public class MainMenuUI : MonoBehaviour
     private void Start()
     {
         
-        _startButtonText.text = SaveSystem.Instance.SavedGameFound ? "CONTINUE SAVED GAME" : "START NEW GAME";
+        _startButtonText.text = SaveSystem.Instance.NumSavesFound > 0 ? "CONTINUE SAVED GAME" : "START NEW GAME";
         _startButton.onClick.AddListener(() =>
         {
             StartGame();
@@ -23,6 +23,7 @@ public class MainMenuUI : MonoBehaviour
 
     private void StartGame()
     {
+
         SceneManager.LoadScene("GameScene");
     }
 

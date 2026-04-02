@@ -1,19 +1,21 @@
-using UnityEngine;
 using System.IO;
+using Unity.Mathematics;
+using UnityEngine;
 
 public class SaveSystem : MonoBehaviour
 {
     [SerializeField] private int _saveInterval;
 
-    private string _saveFileName = "citybuildersave.json";
-    private string _filePath;
+    private string _saveFileName = "citybuildersave";
     private SaveFileData _saveFileData = new();
     private float _saveTimer = 0f;
+    private int _manualSaveSlots = 3;
+    private int _currentSlotIndex = 0;
 
 
     public static SaveSystem Instance;
     public SaveFileData SaveFileData => _saveFileData;
-    public bool SavedGameFound => File.Exists(_filePath);
+    public int NumSavesFound => 0;
     public bool AutoSaveEnabled;
 
 
@@ -28,10 +30,8 @@ public class SaveSystem : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        _filePath = Path.Combine(Application.persistentDataPath, _saveFileName);
-        Debug.Log($"Save file path: {_filePath}");
         DisableAutoSave();
-
+        SetSaveSlot(0);
     }
 
 
@@ -65,7 +65,7 @@ public class SaveSystem : MonoBehaviour
 
     public bool LoadSavedGame()
     {
-        if (!SavedGameFound) 
+        if (!HasSaveFile())
         {
             Debug.Log("No save file found");
             return true; // No save file found, but not an error, so the return value is still true 
@@ -74,9 +74,16 @@ public class SaveSystem : MonoBehaviour
         return ParseSaveFile();
     }
 
-    public Sprite LoadScreenshot()
+
+    public string GetDateSaved(int slotIndex)
     {
-        string screenshotPath = _filePath.Replace(".json", ".png");
+        return HasSaveFile() ? File.GetLastWriteTime(GetSaveFilePath(slotIndex)).ToString("g") : "---";
+    }
+
+
+    public Sprite GetScreenshot(int slotIndex)
+    {
+        string screenshotPath = GetScreenshotPath(slotIndex);
         Texture2D texture = new Texture2D(1, 1);
         Sprite sprite = null;
 
@@ -85,17 +92,33 @@ public class SaveSystem : MonoBehaviour
             byte[] fileData = File.ReadAllBytes(screenshotPath);
             texture.LoadImage(fileData);
             sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
-            Debug.Log($"Loaded screenshot from: {screenshotPath}");
         }
 
         return sprite;
+    }
+
+    private string GetSaveFilePath(int slotIndex = -1)
+    {
+        int i = (slotIndex == -1) ? _currentSlotIndex : slotIndex;
+        return Path.Combine(Application.persistentDataPath, $"{_saveFileName}{_currentSlotIndex}.json");
+    }
+
+    private string GetScreenshotPath(int slotIndex = -1)
+    {
+        int i = (slotIndex == -1) ? _currentSlotIndex : slotIndex;
+        return Path.Combine(Application.persistentDataPath, $"{_saveFileName}{i}.png");
+    }
+
+    private bool HasSaveFile()
+    {
+        return File.Exists(GetSaveFilePath());
     }
 
     private bool ParseSaveFile()
     {
         try
         {
-            string fileText = File.ReadAllText(_filePath);
+            string fileText = File.ReadAllText(GetSaveFilePath());
             _saveFileData = JsonUtility.FromJson<SaveFileData>(fileText);
         }
         catch (System.Exception e)
@@ -118,15 +141,18 @@ public class SaveSystem : MonoBehaviour
         _saveFileData.PlacedBuildings = CityBuilder.Instance.GetPlacedBuildings();
 
         string fileText = JsonUtility.ToJson(_saveFileData, true);
-        string filePath = Path.Combine(Application.persistentDataPath, _saveFileName);
-        File.WriteAllText(filePath, fileText);
-        Debug.Log($"Game data saved to {filePath}");
+        File.WriteAllText(GetSaveFilePath(), fileText);
+        ScreenCapture.CaptureScreenshot(GetScreenshotPath());
 
-        string screenshotPath = filePath.Replace(".json", ".png");
-        ScreenCapture.CaptureScreenshot(screenshotPath);
-        Debug.Log($"Screenshot saved to: {screenshotPath}");
-
+        Debug.Log($"Game saved in slot {_currentSlotIndex}");
         return true;
+    }
+
+    public int SetSaveSlot(int slotIndex)
+    {
+        _currentSlotIndex = math.clamp(slotIndex, 0, _manualSaveSlots); ;
+        Debug.Log($"Save slot set to: {_currentSlotIndex}");
+        return _currentSlotIndex;
     }
 
 

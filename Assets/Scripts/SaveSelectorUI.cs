@@ -11,20 +11,22 @@ public class SaveSelectorUI : MonoBehaviour
         _saveSlots = GetComponentsInChildren<SaveSlotUI>();
         for (int i = 0; i < _saveSlots.Length; i++)
         {
+            _saveSlots[i].SetSlotIndex(i);
             Button button = _saveSlots[i].Button;
-            int index = i; // Capture the current value of i for the lambda
+            // copy the current value of i to a local variable to avoid the modified closure issue
+            int index = i; 
             button.onClick.AddListener(() => OnClick_SaveSlot(_saveSlots[index], index));
-
-            Debug.Log($"Added listener to button {i}");
         }
+    }
 
+    private void Start()
+    {
         SetSlotOutlineColours();
     }
 
     private void OnClick_SaveSlot(SaveSlotUI saveSlot, int slotIndex)
     {
-        Debug.Log($"Clicked on slot {slotIndex}");
-        _selectedSlotIndex = slotIndex;
+        _selectedSlotIndex = SaveSystem.Instance.SetSaveSlot(slotIndex);         
         SetSlotOutlineColours();
     }
 
