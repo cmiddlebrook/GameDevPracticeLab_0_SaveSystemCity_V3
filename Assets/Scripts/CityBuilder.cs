@@ -36,7 +36,9 @@ public class CityBuilder : MonoBehaviour
             _buildingAreas[buildingArea.transform.position] = buildingArea;
         }
 
-        LoadBuildingsFromSave(SaveSystem.Instance.SaveFileData.PlacedBuildings);
+        SaveFileData save = SaveSystem.Instance.SaveFileData;
+        LoadBuildingsFromSave(save.PlacedBuildings);
+        ResourceManager.Instance.SetResources(save.Money, save.Power);
         SaveSystem.Instance.StartAutosaves(5);
     }
 

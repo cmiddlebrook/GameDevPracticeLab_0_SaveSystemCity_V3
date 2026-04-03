@@ -141,7 +141,6 @@ public class SaveSystem : MonoBehaviour
     {
         _saveFileData.Money = ResourceManager.Instance.GetMoney();
         _saveFileData.Power = ResourceManager.Instance.GetPower();
-        _saveFileData.Population = ResourceManager.Instance.GetPopulation();
         _saveFileData.PlacedBuildings = CityBuilder.Instance.GetPlacedBuildings();
 
         string fileText = JsonUtility.ToJson(_saveFileData, true);

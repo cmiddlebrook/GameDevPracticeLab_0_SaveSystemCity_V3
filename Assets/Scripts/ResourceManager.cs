@@ -23,7 +23,6 @@ public class ResourceManager : MonoBehaviour
 
         _money = data.Money;
         _power = data.Power;
-        _population = data.Population;
 
         Debug.Log("Resources loaded from save file");
     }
@@ -58,11 +57,10 @@ public class ResourceManager : MonoBehaviour
         return _population;
     }
 
-    public void SetResources(int money, int power, int population)
+    public void SetResources(int money, int power)
     {
         _money = money;
         _power = power;
-        _population = population;
     }
 
 }
